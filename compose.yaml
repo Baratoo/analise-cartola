@@ -1,0 +1,17 @@
+name: analise-cartola
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: cartola-postgres
+    environment:
+      POSTGRES_DB: analise_cartola
+      POSTGRES_USER: cartola
+      POSTGRES_PASSWORD: ${CARTOLA_DB_PASSWORD:?Defina CARTOLA_DB_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - cartola_dados:/var/lib/postgresql/data
+
+volumes:
+  cartola_dados:
