@@ -2,10 +2,7 @@ package analise_cartola.escalacao;
 
 import analise_cartola.integracao.cartola.CartolaClient;
 import analise_cartola.integracao.cartola.dto.CartolaEscalacaoResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -13,9 +10,11 @@ import java.io.IOException;
 @RequestMapping("/times")
 public class EscalacaoController {
     private CartolaClient cartolaClient;
+    private final ImportacaoEscalacaoService importacaoEscalacaoService;
 
-    public EscalacaoController(CartolaClient cartolaClient) {
+    public EscalacaoController(CartolaClient cartolaClient, ImportacaoEscalacaoService importacaoEscalacaoService) {
         this.cartolaClient = cartolaClient;
+        this.importacaoEscalacaoService = importacaoEscalacaoService;
     }
 
     @GetMapping(value="/{timeId}/escalacoes/{rodada}",
@@ -25,5 +24,13 @@ public class EscalacaoController {
             throws IOException, InterruptedException{
 
         return cartolaClient.buscarEscalacao(timeId, rodada);
+    }
+
+    @PostMapping(value = "/{timeId}/escalacoes/{rodada}/importacao",
+                produces = "application/json")
+    public Escalacao importarEscalacao(@PathVariable("timeId") Long timeId,
+                                       @PathVariable("rodada") Integer rodada)
+            throws IOException, InterruptedException{
+        return importacaoEscalacaoService.importar(2026, timeId, rodada);
     }
 }
