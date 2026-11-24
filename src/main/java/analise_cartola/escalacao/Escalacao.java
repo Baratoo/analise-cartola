@@ -39,6 +39,9 @@ public class Escalacao {
     @Column(name = "atualizado_em", nullable = false)
     private Instant atualizadoEm;
 
+    @Column(nullable = false)
+    private boolean consolidada;
+
     protected Escalacao() {
 
     }
@@ -91,6 +94,8 @@ public class Escalacao {
         return atualizadoEm;
     }
 
+    public boolean isConsolidada() { return consolidada; }
+
     public void atualizarDados(Long capitaoId, Long reservaLuxoId, Integer esquemaId, BigDecimal pontos, BigDecimal patrimonio) {
         this.capitaoId = capitaoId;
         this.reservaLuxoId = reservaLuxoId;
@@ -101,3 +106,4 @@ public class Escalacao {
     }
 
 }
+

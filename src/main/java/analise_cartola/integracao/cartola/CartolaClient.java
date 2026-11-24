@@ -1,6 +1,7 @@
 package analise_cartola.integracao.cartola;
 
 import analise_cartola.integracao.cartola.dto.CartolaEscalacaoResponse;
+import analise_cartola.integracao.cartola.dto.CartolaMercadoStatusResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -54,6 +55,20 @@ public class CartolaClient {
 
             return jsonMapper.readValue(response.body(), CartolaEscalacaoResponse.class);
             //return response.body();
+    }
+
+    public CartolaMercadoStatusResponse buscarMercadoStatus()
+        throws IOException, InterruptedException {
+
+        HttpRequest request = getRequest("/mercado/status");
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() != 200) {
+            throw new IOException("Erro ao consultar situação do mercado. HTTP: " + response.statusCode());
+        }
+
+        return jsonMapper.readValue(response.body(), CartolaMercadoStatusResponse.class);
     }
 }
 

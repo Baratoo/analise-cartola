@@ -1,0 +1,2 @@
+ALTER TABLE escalacao
+    ADD COLUMN consolidada BOOLEAN NOT NULL DEFAULT FALSE;
