@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface AtletaEscaladoRepository extends JpaRepository<Escalacao, Long> {
+public interface AtletaEscaladoRepository extends JpaRepository<AtletaEscalado, Long> {
 
     List<AtletaEscalado> findByEscalacao_Id(Long escalacaoId);
 }

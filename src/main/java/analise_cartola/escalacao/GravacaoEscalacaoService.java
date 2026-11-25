@@ -11,10 +11,13 @@ public class GravacaoEscalacaoService {
 
     private final TimeCartolaService timeCartolaService;
     private final EscalacaoRepository escalacaoRepository;
+    private final AtletaEscaladoService atletaEscaladoService;
 
-    public GravacaoEscalacaoService(TimeCartolaService timeCartolaService, EscalacaoRepository escalacaoRepository) {
+    public GravacaoEscalacaoService(TimeCartolaService timeCartolaService, EscalacaoRepository escalacaoRepository,
+                                    AtletaEscaladoService atletaEscaladoService) {
         this.timeCartolaService = timeCartolaService;
         this.escalacaoRepository = escalacaoRepository;
+        this.atletaEscaladoService = atletaEscaladoService;
     }
 
     @Transactional
@@ -27,9 +30,11 @@ public class GravacaoEscalacaoService {
 
         escalacao.atualizarDados(dados.capitaoId(), dados.reservaLuxoId(), dados.esquemaId(), dados.pontos(), dados.patrimonio());
 
-        escalacaoRepository.save(escalacao);
+        Escalacao escalacaoSalva = escalacaoRepository.save(escalacao);
 
-        return escalacao;
+        atletaEscaladoService.sincronizar(escalacaoSalva,  dados);
+
+        return escalacaoSalva;
     }
 
 }
