@@ -5,6 +5,7 @@ import analise_cartola.integracao.cartola.dto.CartolaEscalacaoResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/times")
@@ -27,10 +28,24 @@ public class EscalacaoController {
     }
 
     @PostMapping(value = "/{timeId}/escalacoes/{rodada}/importacao",
-                produces = "application/json")
+            produces = "application/json")
     public Escalacao importarEscalacao(@PathVariable("timeId") Long timeId,
-                                       @PathVariable("rodada") Integer rodada)
-            throws IOException, InterruptedException{
-        return importacaoEscalacaoService.importar(2026, timeId, rodada);
+                                       @PathVariable("rodada") Integer rodada,
+                                       @RequestParam("temporada") Integer temporada)
+            throws IOException, InterruptedException {
+
+        return importacaoEscalacaoService.importar(temporada, timeId, rodada);
+    }
+
+    @PostMapping(value = "/{timeId}/escalacoes/importacao",
+            produces = "application/json")
+    public List<Escalacao> importarIntervalo(@PathVariable("timeId") Long timeId,
+                                             @RequestParam("temporada") Integer temporada,
+                                             @RequestParam("rodadaInicial") Integer rodadaInicial,
+                                             @RequestParam("rodadaFinal") Integer rodadaFinal)
+            throws IOException, InterruptedException {
+
+        return importacaoEscalacaoService.importarIntervalo(
+                temporada, timeId, rodadaInicial, rodadaFinal);
     }
 }

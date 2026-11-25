@@ -6,6 +6,8 @@ import analise_cartola.integracao.cartola.dto.CartolaMercadoStatusResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,6 +23,22 @@ public class ImportacaoEscalacaoService {
         this.cartolaClient = cartolaClient;
         this.gravacaoEscalacaoService = gravacaoEscalacaoService;
         this.escalacaoRepository = escalacaoRepository;
+    }
+
+    public List<Escalacao> importarIntervalo(Integer temporada, Long timeId, Integer rodadaInicial, Integer rodadaFinal)
+        throws IOException, InterruptedException{
+        if (rodadaInicial == null || rodadaFinal == null || rodadaFinal <= 0 || rodadaFinal < rodadaInicial) {
+            throw new IllegalArgumentException("Informe um intervalo válido");
+        }
+
+        List<Escalacao> escalacoes = new ArrayList<>();
+
+        for (int rodada = rodadaInicial; rodada <= rodadaFinal; rodada++) {
+            Escalacao escalacao = importar(temporada, timeId, rodada);
+            escalacoes.add(escalacao);
+        }
+
+        return escalacoes;
     }
 
     public Escalacao importar(Integer temporada, Long timeId, Integer rodada)
