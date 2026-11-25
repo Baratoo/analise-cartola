@@ -69,6 +69,7 @@ public class CartolaClient {
         }
 
         return jsonMapper.readValue(response.body(), CartolaMercadoStatusResponse.class);
+
     }
 }
 

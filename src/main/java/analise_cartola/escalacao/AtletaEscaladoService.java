@@ -29,11 +29,10 @@ public class AtletaEscaladoService {
         sincronizarLista(escalacao, OrigemAtletaEscalado.ATLETAS, dados.atletas(), existentes);
 
         if (dados.reservas() != null){
-            sincronizarLista(escalacao, OrigemAtletaEscalado.RESERVAS, dados.atletas(), existentes);
+            sincronizarLista(escalacao, OrigemAtletaEscalado.RESERVAS, dados.reservas(), existentes);
         }
 
     }
-
 
     public void sincronizarLista(Escalacao escalacao, OrigemAtletaEscalado origem, List<CartolaAtletaResponse> recebidos,
                                  List<AtletaEscalado> existentes) {

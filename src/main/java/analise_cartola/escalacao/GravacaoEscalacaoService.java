@@ -21,7 +21,7 @@ public class GravacaoEscalacaoService {
     }
 
     @Transactional
-    public Escalacao salvar(Integer temporada, CartolaEscalacaoResponse dados){
+    public Escalacao salvar(Integer temporada, CartolaEscalacaoResponse dados, boolean podeConsolidar){
 
         TimeCartola time = timeCartolaService.salvarOuAtualizar(dados.time());
 
@@ -33,6 +33,10 @@ public class GravacaoEscalacaoService {
         Escalacao escalacaoSalva = escalacaoRepository.save(escalacao);
 
         atletaEscaladoService.sincronizar(escalacaoSalva,  dados);
+
+        if (podeConsolidar && dados.atletas() != null && !dados.atletas().isEmpty()) {
+            escalacaoSalva.consolidar();
+        }
 
         return escalacaoSalva;
     }

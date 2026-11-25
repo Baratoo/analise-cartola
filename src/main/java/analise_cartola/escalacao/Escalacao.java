@@ -105,5 +105,9 @@ public class Escalacao {
         this.atualizadoEm = Instant.now();
     }
 
+    public void consolidar() {
+        this.consolidada = true;
+    }
+
 }
 

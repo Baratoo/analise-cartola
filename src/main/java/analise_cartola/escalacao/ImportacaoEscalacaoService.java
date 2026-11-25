@@ -15,6 +15,8 @@ public class ImportacaoEscalacaoService {
     private final GravacaoEscalacaoService gravacaoEscalacaoService;
     private final EscalacaoRepository escalacaoRepository;
 
+    private static final int MERCADO_ABERTO = 1;
+
     public ImportacaoEscalacaoService(CartolaClient cartolaClient, GravacaoEscalacaoService gravacaoEscalacaoService, EscalacaoRepository escalacaoRepository) {
         this.cartolaClient = cartolaClient;
         this.gravacaoEscalacaoService = gravacaoEscalacaoService;
@@ -35,7 +37,7 @@ public class ImportacaoEscalacaoService {
             return existente.get();
         }
 
-        validaMercado(temporada, rodada);
+        CartolaMercadoStatusResponse status = validaMercado(temporada, rodada);
 
         CartolaEscalacaoResponse response = cartolaClient.buscarEscalacao(timeId, rodada);
 
@@ -43,12 +45,12 @@ public class ImportacaoEscalacaoService {
             throw new IOException("A resposta do Cartola não corresponde ao time e à rodada solicitados.");
         }
 
-        Escalacao escalacao = gravacaoEscalacaoService.salvar(temporada, response);
+        Escalacao escalacao = gravacaoEscalacaoService.salvar(temporada, response, podeConsolidar(rodada, status));
 
         return escalacao;
     }
 
-    public void validaMercado(Integer temporada, Integer rodada)
+    public CartolaMercadoStatusResponse validaMercado(Integer temporada, Integer rodada)
             throws IOException, InterruptedException {
 
         CartolaMercadoStatusResponse status = cartolaClient.buscarMercadoStatus();
@@ -64,5 +66,14 @@ public class ImportacaoEscalacaoService {
         if (rodada > status.rodadaAtual()) {
             throw new IllegalArgumentException("Não é permitido importar uma rodada futura.");
         }
+
+        return status;
+    }
+
+    private boolean podeConsolidar(Integer rodada, CartolaMercadoStatusResponse status) {
+
+        return rodada < status.rodadaAtual() && status.statusMercado() == MERCADO_ABERTO &&
+                status.mercadoPosRodada() == true && status.bolaRolando() == false &&
+                status.gameOver() == false;
     }
 }
