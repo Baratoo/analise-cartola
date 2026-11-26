@@ -2,6 +2,7 @@ package analise_cartola.integracao.cartola;
 
 import analise_cartola.integracao.cartola.dto.CartolaEscalacaoResponse;
 import analise_cartola.integracao.cartola.dto.CartolaMercadoStatusResponse;
+import analise_cartola.integracao.cartola.dto.CartolaPontuadosResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -69,7 +70,22 @@ public class CartolaClient {
         }
 
         return jsonMapper.readValue(response.body(), CartolaMercadoStatusResponse.class);
+    }
 
+    public CartolaPontuadosResponse buscarPontuados(Integer rodada)
+        throws IOException, InterruptedException {
+
+        HttpRequest request = getRequest("/atletas/pontuados/" + rodada);
+
+        System.out.println("Consultando: " + request.uri());
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() != 200) {
+            throw new IOException("Erro ao consultar pontuados. HTTP " + response.statusCode());
+        }
+
+        return jsonMapper.readValue(response.body(), CartolaPontuadosResponse.class);
     }
 }
 
