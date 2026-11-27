@@ -22,9 +22,9 @@ public class DesempenhoAtletaRodadaService {
 
         desempenho.atualizarDados(dados.clubeId(), dados.posicaoId(), dados.pontuacao(), dados.entrouEmCampo(), dados.scout());
 
-        desempenhoAtletaRepository.save(desempenho);
+        return desempenhoAtletaRepository.save(desempenho);
 
-        return desempenho;
+//        return desempenho;
     }
 
 }

@@ -2,6 +2,7 @@ package analise_cartola.integracao.cartola;
 
 import analise_cartola.integracao.cartola.dto.CartolaEscalacaoResponse;
 import analise_cartola.integracao.cartola.dto.CartolaMercadoStatusResponse;
+import analise_cartola.integracao.cartola.dto.CartolaPartidasResponse;
 import analise_cartola.integracao.cartola.dto.CartolaPontuadosResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,26 +10,51 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.ZonedDateTime;
 
 @Component
 public class CartolaClient {
     private final HttpClient httpClient;
     private final String baseURL;
     private final JsonMapper jsonMapper;
+    private final CartolaRequisicaoLogger requisicaoLogger;
 
     public CartolaClient(@Value("${cartola.api.base-url}") String baseURL,
-                         JsonMapper jsonMapper) {
-            this.httpClient = HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .connectTimeout(Duration.ofSeconds(10)).build();
-            this.baseURL = baseURL;
-            this.jsonMapper = jsonMapper;
+                         JsonMapper jsonMapper,
+                         CartolaRequisicaoLogger requisicaoLogger) {
+        this.httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(10)).build();
+        this.baseURL = baseURL;
+        this.jsonMapper = jsonMapper;
+        this.requisicaoLogger = requisicaoLogger;
+    }
+
+    private HttpResponse<String> enviar(HttpRequest request)
+            throws IOException, InterruptedException {
+
+        ZonedDateTime inicio = ZonedDateTime.now();
+        long inicioNanos = System.nanoTime();
+
+        HttpResponse<String> response;
+
+        try {
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (IOException | InterruptedException erro) {
+            long duracaoMs = Duration.ofNanos(System.nanoTime() - inicioNanos).toMillis();
+
+            requisicaoLogger.registrarFalha(request, erro, inicio, duracaoMs);
+            throw erro;
+        }
+
+        long duracaoMs = Duration.ofNanos(System.nanoTime() - inicioNanos).toMillis();
+        requisicaoLogger.registrarResposta(request, response, inicio, duracaoMs);
+        return response;
     }
 
     public HttpRequest getRequest(String caminho) {
@@ -42,28 +68,25 @@ public class CartolaClient {
     }
 
     public CartolaEscalacaoResponse buscarEscalacao(Long idTime, int rodada)
-        throws IOException, InterruptedException {
+            throws IOException, InterruptedException {
 
         HttpRequest request = getRequest("/time/id/" + idTime + "/" + rodada);
 
-        HttpResponse<String> response = httpClient.send(
-                request,
-                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        HttpResponse<String> response = enviar(request);
 
-            if(response.statusCode() != 200){
-                throw new IOException("Erro ao consulta escalação. " + response.statusCode());
-            }
+        if(response.statusCode() != 200){
+            throw new IOException("Erro ao consulta escalação. " + response.statusCode());
+        }
 
-            return jsonMapper.readValue(response.body(), CartolaEscalacaoResponse.class);
-            //return response.body();
+        return jsonMapper.readValue(response.body(), CartolaEscalacaoResponse.class);
     }
 
     public CartolaMercadoStatusResponse buscarMercadoStatus()
-        throws IOException, InterruptedException {
+            throws IOException, InterruptedException {
 
         HttpRequest request = getRequest("/mercado/status");
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        HttpResponse<String> response = enviar(request);
 
         if (response.statusCode() != 200) {
             throw new IOException("Erro ao consultar situação do mercado. HTTP: " + response.statusCode());
@@ -73,13 +96,11 @@ public class CartolaClient {
     }
 
     public CartolaPontuadosResponse buscarPontuados(Integer rodada)
-        throws IOException, InterruptedException {
+            throws IOException, InterruptedException {
 
         HttpRequest request = getRequest("/atletas/pontuados/" + rodada);
 
-        System.out.println("Consultando: " + request.uri());
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        HttpResponse<String> response = enviar(request);
 
         if (response.statusCode() != 200) {
             throw new IOException("Erro ao consultar pontuados. HTTP " + response.statusCode());
@@ -87,6 +108,18 @@ public class CartolaClient {
 
         return jsonMapper.readValue(response.body(), CartolaPontuadosResponse.class);
     }
+
+    public CartolaPartidasResponse buscarPartidas(Integer rodada)
+            throws IOException, InterruptedException {
+
+        HttpRequest request = getRequest("/partidas/" + rodada);
+
+        HttpResponse<String> response = enviar(request);
+
+        if (response.statusCode() != 200) {
+            throw new IOException("Erro ao consultar partidas. HTTP " + response.statusCode());
+        }
+
+        return jsonMapper.readValue(response.body(), CartolaPartidasResponse.class);
+    }
 }
-
-

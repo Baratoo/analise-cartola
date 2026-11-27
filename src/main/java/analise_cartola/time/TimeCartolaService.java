@@ -23,9 +23,9 @@ public class TimeCartolaService {
 
         time.atualizarDados(dados.nome(), dados.nomeCartola(), dados.slug(), dados.urlEscudo());
 
-        timeCartolaRepository.save(time);
+        return timeCartolaRepository.save(time);
 
-        return time;
+//        return time;
 
     }
 }

@@ -22,8 +22,8 @@ public class AtletaService {
 
         atleta.atualizarDados(apelido);
 
-        atletaRepository.save(atleta);
+        return atletaRepository.save(atleta);
 
-        return atleta;
+//        return atleta;
     }
 }

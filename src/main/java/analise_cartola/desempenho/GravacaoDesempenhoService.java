@@ -13,14 +13,15 @@ public class GravacaoDesempenhoService {
 
     private final AtletaService atletaService;
     private final DesempenhoAtletaRodadaService desempenhoService;
+    private final ImportacaoDesempenhoRepository importacaoDesempenhoRepository;
 
-    public GravacaoDesempenhoService(AtletaService atletaService, DesempenhoAtletaRodadaService desempenhoService) {
+    public GravacaoDesempenhoService(AtletaService atletaService, DesempenhoAtletaRodadaService desempenhoService, ImportacaoDesempenhoRepository importacaoDesempenhoRepository) {
         this.atletaService = atletaService;
         this.desempenhoService = desempenhoService;
+        this.importacaoDesempenhoRepository = importacaoDesempenhoRepository;
     }
 
-
-    public int salvar(Integer temporada, CartolaPontuadosResponse dados){ //retorna quantidade salvos
+    public int salvar(Integer temporada, CartolaPontuadosResponse dados, boolean consolidada){ //retorna quantidade salvos
 
         if (temporada == null || temporada <= 0) {
             throw new IllegalArgumentException("A temporada deve ser positiva.");
@@ -53,6 +54,13 @@ public class GravacaoDesempenhoService {
 
             quantidade++;
         }
+
+        ImportacaoDesempenho importacaoDesempenho = importacaoDesempenhoRepository.findByTemporadaAndRodada(temporada, dados.rodada()).
+                orElseGet(() -> new ImportacaoDesempenho(temporada, dados.rodada()));
+
+        importacaoDesempenho.atualizarDados(quantidade, consolidada);
+
+        importacaoDesempenhoRepository.save(importacaoDesempenho);
 
         return quantidade;
     }
